@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>User Settings</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #171717; /* Черный фон */
+      color: #ffffff; /* Белый цвет текста */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 400px;
+      padding: 20px;
+      background-color: #1f1f1f; /* Цвет панели настроек пользователя */
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input[type="file"],
+    input[type="text"],
+    input[type="submit"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #2d2d2d; /* Цвет рамки поля ввода */
+      border-radius: 5px;
+      background-color: #282828; /* Цвет поля ввода */
+      color: #ffffff; /* Белый цвет текста в поле ввода */
+    }
+
+    input[type="submit"] {
+      background-color: #00a0df; /* Цвет кнопки */
+      cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #007bb6; /* Цвет при наведении */
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+    }
+
+    /* Стилизация кнопки выбора файла и отображение выбранного изображения */
+    .avatar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .file-input-wrapper input[type=file] {
+      font-size: 100px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer; /* Добавлен курсор указывающий на то, что это кнопка для выбора файла */
+    }
+
+    .avatar-preview {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      overflow: hidden;
+      background-color: #282828;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .avatar-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Настройки аккаунта</h2>
+  <form action="/update_profile" method="post" enctype="multipart/form-data">
+    <div class="avatar-container">
+      <label for="avatar" class="file-input-wrapper">
+        <input type="file" id="avatar" name="avatar" onchange="displayImage(this)">
+        <div class="avatar-preview" id="avatarPreview">
+          <img src="placeholder.jpg" alt="Нажми на меня">
+        </div>
+      </label>
+    </div>
+    <div class="form-group">
+      <label for="nickname">Имя:</label>
+      <input type="text" id="nickname" name="nickname">
+    </div>
+    <div class="form-group">
+      <label for="status">Статус:</label>
+      <input type="text" id="status" name="status">
+    </div>
+    <div class="form-group">
+      <label for="bio">БИО:</label>
+      <textarea id="bio" name="bio" rows="4"></textarea>
+    </div>
+    <div class="form-group">
+      <input type="submit" value="Сохранить изменения">
+    </div>
+  </form>
+</div>
+
+<script>
+  function displayImage(input) {
+    const avatarPreview = document.getElementById('avatarPreview');
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        avatarPreview.innerHTML = '<img src="' + e.target.result + '" alt="Avatar Preview">';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+
+</body>
+</html>

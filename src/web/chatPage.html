@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Socket.IO chat</title>
+  <link rel="stylesheet" href="styles/chatCSS.css">
+
+</head>
+<body>
+
+  <div id="chat-panel">
+    <div id="search-bar">
+      <input type="text" id="search-input" placeholder="Search chats...">
+    </div>
+    <ul id="chat-list">
+      <li>Chat 1</li>
+      <li>Chat 2</li>
+      <li>Chat 3</li>
+    </ul>
+  </div>
+  
+  <div id="chat-window">
+    <ul id="messages"></ul>
+    <form id="form" action="">
+      <input id="input" autocomplete="off" /><button id="bs">Send</button>
+    </form>
+  </div>
+
+  <div id="chat-title" onclick="changeChat('General')">
+    <img src="https://via.placeholder.com/50" alt="Chat Icon"> <!-- Изображение слева от названия -->
+    General Chat
+  </div> <!-- Название чата кликабельное -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+  <script src="./cookieAPI.js" type="module"></script>
+  <script type="module">
+    var timeNow = new Date()
+    import getCookie from './API/cookieAPI.js';
+    const sock = io('/chat');
+    var currentChat = '';
+
+    // Функция для добавления сообщений в чат
+    function addMessage(username, message, time) {
+      var li = document.createElement('li');
+      li.classList.add('message');
+      li.innerHTML = `
+        <img class="avatar" src="https://via.placeholder.com/50" alt="User Avatar">
+        <div class="message-content">
+          <div class="user-info">
+            <p class="username">${username}</p>
+            <p class="message-time">${time}</p>
+          </div>
+          <div class="message-text">${message}</div>
+          <div class="message-options">
+            <button class="edit-button">Edit</button>
+            <button>Delete</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('messages').appendChild(li);
+      // Добавляем обработчик события для кнопки "Редактировать"
+      li.querySelector('.edit-button').addEventListener('click', () => {
+        editMessage(li); // Вызываем функцию редактирования сообщения
+      });
+    }
+
+
+
+    // Функция для изменения сообщения
+    function editMessage(messageElement) {
+      const messageText = messageElement.querySelector('.message-text');
+      const messageContent = messageText.textContent;
+      const editInput = document.createElement('input');
+      editInput.type = 'text';
+      editInput.value = messageContent;
+      editInput.classList.add('edit-input'); // Добавляем класс для стилизации
+      messageText.innerHTML = '';
+      messageText.appendChild(editInput);
+      editInput.focus(); // Помещаем фокус в поле ввода
+      // Добавляем обработчик события для нажатия клавиши "Enter" в поле ввода
+      editInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+          // Сохраняем изменения при нажатии "Enter"
+          messageText.textContent = editInput.value;
+        }
+      });
+    }
+
+    // Функция для изменения названия чата
+    function changeChat(chatName) {
+      document.getElementById('chat-title').textContent = chatName;
+      currentChat = chatName;
+    }
+
+    function clearMessages() {
+      const messagesList = document.getElementById('messages');
+      messagesList.innerHTML = ''; // Очищаем содержимое списка
+    }
+
+    // Отправка сообщения на сервер при нажатии кнопки
+    document.getElementById('bs').addEventListener('click', () => {
+      event.preventDefault();
+      const uName = getCookie('userName');
+      var message = document.getElementById('input').value;
+      console.log(currentChat)
+      const dateNow = `${timeNow.getHours()}:${timeNow.getMinutes()}`
+      sock.emit('message', { name: uName, mess: message, chatName: currentChat, date: dateNow});
+      document.getElementById('input').value = '';
+    });
+
+    // Получение сообщений от сервера и добавление их в чат
+    sock.on('chatMessage', (data) => {
+      const { username, message, chatNameForSend, time } = data;
+      if(currentChat == chatNameForSend){
+        addMessage(username, message, time);
+      }
+    });
+
+    sock.on('loadMessage', (data) => {
+      const { username, message, date } = data;
+        addMessage(username, message, date);
+    });
+
+    // Обработчик клика по чату
+    function handleChatClick(chatName, chatNameForDB) {
+      changeChat(chatName); // Изменяем название чата
+      clearMessages()
+      sock.emit('join', chatNameForDB); // Отправляем на сервер сообщение о смене чата
+    }
+
+    // Добавление обработчиков клика к чатам
+    document.querySelectorAll('#chat-list li').forEach((chat, index) => {
+      chat.addEventListener('click', () => {
+        handleChatClick(chat.textContent.trim(), `chat_${index + 1}`);
+      });
+    });
+  </script>
+</body>
+</html>
