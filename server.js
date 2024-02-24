@@ -25,14 +25,20 @@ import regSocket from './src/sockets/regSocket.js'
 regSocket(io)
 chatSocket(io)
 loginSocket(io)
+const staticUrl = 'https://wave-connect-deploy.vercel.app';
 
-app.use(express.static('./src/web'));
+app.use(express.static(path.join(__dirname, 'src', 'web')));
 
-app.use('/reg', regRoute)
-app.use('/login', loginRoute)
-app.use('/chat', chatRoute)
-app.use('/settings', settingsRoute)
+app.use('/reg', regRoute);
+app.use('/login', loginRoute);
+app.use('/chat', chatRoute);
+app.use('/settings', settingsRoute);
+
+// Redirect root requests to the static URL
+app.get('/', (req, res) => {
+    res.redirect(staticUrl);
+});
 
 server.listen(8080, () => {
-    console.log('Сервер запущен')
-})
+    console.log('Сервер запущен');
+});

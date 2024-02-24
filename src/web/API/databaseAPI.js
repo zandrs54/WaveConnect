@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb';
 
-const url = 'mongodb://localhost:27017';
+const url = 'mongodb://admin:Z%26N5RrJF@ketiringrur.beget.app/';
 const dbName = 'WaveConnect';
 const collectionName = 'users';
 
