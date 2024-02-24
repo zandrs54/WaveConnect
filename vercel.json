@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "name": "wave-conne",
+    "name": "wave-connect",
     "builds": [
        { "src": "server.js", "use": "@vercel/node" }
     ],
