@@ -1,10 +1,10 @@
 {
     "version": 2,
-    "name": "wave-connect",
+    "name": "wave-conne",
     "builds": [
        { "src": "server.js", "use": "@vercel/node" }
     ],
     "routes": [
-       { "reg": "/reg", "login": "/login", "chat": "/chat" }
+       { "src": "/(.*)", "dest": "/server.js" }
     ]
  }
