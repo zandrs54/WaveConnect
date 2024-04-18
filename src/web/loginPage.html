@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Registration</title>
+  <base href="http://localhost:8080/">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #ffffff; /* Белый фон */
+      color: #000000; /* Черный цвет текста */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 400px;
+      padding: 20px;
+      background-color: #ffffff; /* Белый цвет панели регистрации */
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 10px;
+      /*font-weight: bold;*/ /* Убираем жирное выделение */
+      text-align: center;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #cccccc; /* Светло-серый цвет рамки поля ввода */
+      border-radius: 5px;
+      background-color: #ffffff; /* Белый цвет поля ввода */
+      color: #000000; /* Черный цвет текста в поле ввода */
+      margin-bottom: -5px; /* Убираем отступ снизу */
+    }
+
+    input:focus {
+      outline: none;
+    }
+
+    .status-message {
+      font-size: 12px;
+      text-align: center;
+      margin-top: 5px; /* Добавляем отступ сверху */
+      color: red;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #007bff; /* Синий цвет кнопки */
+      color: #ffffff; /* Белый цвет текста на кнопке */
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px; /* Добавляем отступ между полем ввода и кнопкой */
+    }
+
+    button:hover {
+      background-color:  #0056b3; /* Синий цвет при наведении */
+    }
+    
+    .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    .logo {
+        max-width: 300px; /* Максимальная ширина логотипа */
+        height: auto; /* Автоматическое масштабирование высоты */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-container">
+      <img src="/styles/logoza.ru.png" alt="WaveConnect Logo" class="logo">
+    </div>
+    <h2>Авторизация / <a href="/reg">Регистрация</a></h2>
+    <form id="registrationForm">
+      <label for="username">Имя:</label>
+      <input type="text" id="username" name="username" required>
+      <div id="statusUser" class="status-message"> </div>
+      <label for="password">Пароль:</label>
+      <input type="password" id="password" name="password" required>
+      <div id="statusPassword" class="status-message"> </div>
+      <button type="button" id="login">Войти</button>
+    </form>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+  <script>
+    const socket = io('/login')
+
+    //работа с базой данных
+
+    //Получение данных из формы
+    const loginButton = document.getElementById('login')
+    const statusName = document.getElementById('statusUser')
+    const statusPass = document.getElementById('statusPassword')
+
+    loginButton.addEventListener('click', checkData) 
+
+    function checkData(event){
+      const loginName = document.getElementById('username').value
+      const loginPassword = document.getElementById('password').value
+
+      console.log('Отправка данных')
+      console.log(loginName)
+      socket.emit('getData', {loginName, loginPassword})
+      socket.on('getData', (data) => {
+        console.log(data)
+        socket.on('getData', (data) => {
+      const checkedName = data.checkName
+      const checkedPassword = data.checkPass
+
+
+
+      if (checkedName && checkedPassword) {
+        statusName.textContent = ' '
+        statusPass.textContent = ' '
+        document.cookie = `userName=${loginName}` 
+        document.cookie = `userPassword=${loginPassword}`
+        console.log(`В куки записаны поля userName=${loginName}, userPassword=${loginPassword}`)
+        window.location.href = '/chat'
+      } 
+      else if (checkedName && !checkedPassword) {
+        statusName.textContent = ' '
+        statusPass.textContent = 'Неверный пароль'
+      }
+      else if (!checkedName){
+        statusName.textContent = 'Неверное имя пользователя'
+        statusPass.textContent = ' '
+      }
+    });
+      })
+    }
+
+
+  </script>
+</body>
+</html>

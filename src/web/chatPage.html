@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Socket.IO Chat</title>
+<link rel="stylesheet" href="styles/chatCSS.css">
+<style>
+    .search-bar {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .search-bar input[type="text"] {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        outline: none;
+    }
+
+    .search-bar img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+</style>
+</head>
+<body style="font-size: 110%;">
+<div id="container">
+    <div id="chat-panel">
+        <div class="search-bar">
+            <img src="/styles/micro.png" alt="Search Icon">
+            <input type="text" id="search-input" placeholder="Search chats...">
+        </div>
+        <ul id="chat-list">
+
+        </ul>
+    </div>
+
+    <div id="chat-title" onclick="changeChat('General')">
+        <img src="https://via.placeholder.com/50" alt="Chat Icon"> <!-- Изображение слева от названия -->
+        General Chat
+    </div> <!-- Название чата кликабельное -->
+</div>
+
+<div id="chat-window">
+    <ul id="messages"></ul>
+    <form id="form" action="">
+        <input id="input" autocomplete="off" /><button id="bs">Send</button>
+    </form>
+</div>
+
+<!-- Ползунок для переключения темы -->
+<input type="range" id="theme-slider" min="0" max="1" step="1" value="0">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+<script src="./cookieAPI.js" type="module"></script>
+<script type="module">
+    var timeNow = new Date()
+    import getCookie from './API/cookieAPI.js';
+    const sock = io('/chat');
+    sock.emit('loadChats', getCookie('userName'))
+
+    const chatList = document.getElementById('chat-list');
+    var currentChat = '';
+
+
+    sock.on('loadChat', name => {
+        var newChat = document.createElement('li');
+        newChat.textContent = name;
+        console.log('клик')
+        // Добавляем обработчик клика для нового чата
+        newChat.addEventListener('click', () => {
+            handleChatClick(name, name); // Передаем имя чата как chatName и chatNameForDB
+        });
+
+        chatList.appendChild(newChat);
+    });
+
+
+    // Функция для добавления сообщений в чат
+    function addMessage(username, message, time, _id, edited, nameForCheck, avatarLink) {
+        var li = document.createElement('li');
+        li.classList.add('message')
+        li.id = _id
+        console.log(avatarLink)
+        if(username == nameForCheck){
+            if(edited){
+            li.innerHTML = `
+            <img class="avatar" src="${avatarLink}" alt="User Avatar">
+            <div class="message-content">
+                <div class="user-info">
+                    <p class="username">${username}</p>
+                    <p class="message-time">${time}</p>
+                </div>
+                <div id="text-container">
+                    <div class="message-text">${message}</div> <div id="edited">Изменено</div>
+                </div>
+                <div class="message-options">
+                    <button class="edit-button">Edit</button>
+                    <button>Delete</button>
+                </div>
+            </div>
+        `;
+        }
+            else{
+                li.innerHTML = `
+                <img class="avatar" src="${avatarLink}" alt="User Avatar">
+                <div class="message-content">
+                    <div class="user-info">
+                        <p class="username">${username}</p>
+                        <p class="message-time">${time}</p>
+                    </div>
+                    <div class="message-text">${message}</div>
+                    <div class="message-options">
+                        <button class="edit-button">Edit</button>
+                        <button>Delete</button>
+                    </div>
+                </div>
+            `;
+            }
+        }
+        else{
+            if(edited){
+            li.innerHTML = `
+            <img class="avatar" src="${avatarLink}" alt="User Avatar">
+            <div class="message-content">
+                <div class="user-info">
+                    <p class="username">${username}</p>
+                    <p class="message-time">${time}</p>
+                </div>
+                <div id="text-container">
+                    <div class="message-text">${message}</div> <div id="edited">Изменено</div>
+                </div>
+            </div>
+        `;
+        }
+            else{
+                li.innerHTML = `
+                <img class="avatar" src="${avatarLink}" alt="User Avatar">
+                <div class="message-content">
+                    <div class="user-info">
+                        <p class="username">${username}</p>
+                        <p class="message-time">${time}</p>
+                    </div>
+                    <div class="message-text">${message}</div>
+                </div>
+            `;
+            }
+        }
+        
+
+        document.getElementById('messages').appendChild(li);
+        // Добавляем обработчик события для кнопки "Редактировать"
+        li.querySelector('.edit-button').addEventListener('click', () => {
+            editMessage(li); // Вызываем функцию редактирования сообщения
+        });
+    }
+
+
+
+    // Функция для изменения сообщения
+    function editMessage(messageElement) {
+        const messageText = messageElement.querySelector('.message-text');
+        const messageContent = messageText.textContent;
+        const editInput = document.createElement('input');
+        const messageID = messageElement.id
+        const currentChat = document.getElementById('chat-title').textContent
+
+        editInput.type = 'text';
+        editInput.value = messageContent;
+        editInput.classList.add('edit-input'); // Добавляем класс для стилизации
+        messageText.innerHTML = '';
+        messageText.appendChild(editInput);
+        editInput.focus(); // Помещаем фокус в поле ввода
+        // Добавляем обработчик события для нажатия клавиши "Enter" в поле ввода
+        editInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                // Сохраняем изменения при нажатии "Enter"
+                const messageValue = editInput.value;
+                console.log(messageID)
+                sock.emit('editMessage', { messageId: messageID, newMess: messageValue, chatName: currentChat })
+            }
+        });
+    }
+
+    // Функция для изменения названия чата
+    function changeChat(chatName) {
+        document.getElementById('chat-title').textContent = chatName;
+        currentChat = chatName;
+    }
+
+    function clearMessages() {
+        const messagesList = document.getElementById('messages');
+        messagesList.innerHTML = ''; // Очищаем содержимое списка
+    }
+
+    // Отправка сообщения на сервер при нажатии кнопки
+    document.getElementById('bs').addEventListener('click', () => {
+        event.preventDefault();
+        const uName = getCookie('userName');
+        var message = document.getElementById('input').value;
+        console.log(currentChat)
+        const dateNow = `${timeNow.getHours()}:${timeNow.getMinutes()}`
+        sock.emit('message', { name: uName, mess: message, chatName: currentChat, date: dateNow});
+        document.getElementById('input').value = '';
+    });
+
+    // Получение сообщений от сервера и добавление их в чат
+    sock.on('chatMessage', (data) => {
+        const { username, message, chatNameForSend, time, _id, edited, avatarLink } = data;
+        if(currentChat == chatNameForSend){
+            const nameForCheck = getCookie('userName')
+            addMessage(username, message, time, _id, edited, nameForCheck, avatarLink);
+        }
+    });
+
+    sock.on('loadMessage', (data) => {
+        const { username, message, date, _id, edited, avatarLink } = data;
+        const nameForCheck = getCookie('userName')
+        addMessage(username, message, date, _id, edited, nameForCheck, avatarLink);
+    });
+
+    // Обработчик клика по чату
+    function handleChatClick(chatName, chatNameForDB) {
+        const userName = getCookie('userName')
+        console.log('Клик')
+        changeChat(chatName); // Изменяем название чата
+        clearMessages()
+        sock.emit('join', {chatName: chatNameForDB, userName}); // Отправляем на сервер сообщение о смене чата
+    }
+
+    // Добавление обработчиков клика к чатам
+    document.querySelectorAll('#chat-list li').forEach((chat, index) => {
+        chat.addEventListener('click', () => {
+            console.log('клик')
+            handleChatClick(chat.textContent.trim(), `chat_${index + 1}`);
+        });
+    });
+
+    sock.on('messageEdited', (data) => {
+    const { messageId, newMess } = data;
+    
+    // Находим элемент списка сообщений по его _id
+    const messageElement = document.getElementById(messageId);
+    
+    if (messageElement) {
+        // Находим элемент текста сообщения внутри элемента списка
+        const messageTextElement = messageElement.querySelector('.message-text');
+        
+        // Обновляем текст сообщения
+        if (messageTextElement) {
+            messageTextElement.innerHTML = newMess;
+        }
+    }
+});
+
+const userSearchInput = document.getElementById('search-input');
+    userSearchInput.addEventListener('keypress', function(event) {
+        // Проверяем, была ли нажата клавиша Enter (код клавиши 13)
+        if (event.key === 'Enter') {
+            // Получаем значение поля ввода и делаем с ним что-то
+            const user = event.target.value;
+            const name = getCookie('userName')
+            console.log('Нажата клавиша Enter. Введенный текст: ', user);
+            sock.emit('createChat', {firstUser: name, secondUser: user})
+            // Дополнительные действия, которые нужно выполнить при нажатии Enter
+        }
+    });
+</script>
+
+</body>
+</html>

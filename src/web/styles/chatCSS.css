@@ -1,0 +1,308 @@
+body {
+  margin: 0;
+  padding-bottom: 3rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  background-color: #f8f9fa; /* Светло-серый фон */
+  color: #333333; /* Цвет текста */
+}
+
+#chat-panel {
+  width: 20%;
+  max-width: 300px;
+  border-right: 1px solid #ced4da; /* Светло-серый цвет разделительной линии */
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: #ffffff; /* Белый цвет фона панели чатов */
+  min-height: 100vh;
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  z-index: 2;
+}
+
+/* Стили для остальных элементов оставляем без изменений */
+
+#theme-slider {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 150px;
+}
+
+/* Стили для изменения внешнего вида ползунка */
+#theme-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #007bff; /* Цвет ползунка */
+  border-radius: 50%; /* Делаем ползунок круглым */
+  cursor: pointer;
+}
+
+#theme-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Стили для изменения цвета фона ползунка */
+#theme-slider::-webkit-slider-runnable-track {
+  background: #ced4da; /* Светло-серый цвет фона */
+}
+
+#theme-slider::-moz-range-track {
+  background: #ced4da;
+}
+
+
+#search-bar {
+  padding: 1rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ced4da;
+  display: flex;
+  align-items: center;
+}
+
+#search-input {
+  width: calc(100%);
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 10px;
+  background-color: #f1f3f5; /* Светло-серый цвет поля ввода */
+  color: #495057; /* Цвет текста */
+  outline: none;
+}
+
+#search-input::placeholder {
+  color: #999999;
+}
+
+#search-input:focus {
+  border: 1px solid #80bdff; /* Светло-синяя рамка при фокусе */
+}
+
+#chat-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#chat-list li {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#chat-list li:hover {
+  background-color: #f1f3f5; /* Светло-серый цвет при наведении */
+}
+
+#chat-window {
+  flex: 1;
+  padding: 1rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+  max-height: calc(100vh - 3rem);
+  margin-left: 20%;
+  position: relative;
+  background-color: #f8f9fa; /* Светло-серый фон окна чата */
+}
+
+#chat-title {
+  padding: 1rem;
+  border-bottom: 1px solid #ced4da;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  background-color: #ffffff;
+  border-radius: 0;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  position: fixed;
+  top: 0;
+  left: 20%;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+}
+
+#chat-title:hover {
+  background-color: #f1f3f5; /* Светло-серый цвет при наведении */
+}
+
+#chat-title img {
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+#form {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.25rem;
+  bottom: 0;
+  left: 20%;
+  right: 0;
+  display: flex;
+  height: 3rem;
+  box-sizing: border-box;
+  backdrop-filter: blur(10px);
+  position: fixed;
+  z-index: 1;
+}
+
+#input {
+  border: none;
+  padding: 0 1rem;
+  flex-grow: 1;
+  border-radius: 2rem;
+  margin: 0.25rem;
+  background-color: #ffffff; /* Белый цвет поля ввода */
+  color: #333333; /* Цвет текста в поле ввода */
+}
+
+#input:focus {
+  outline: none;
+}
+
+#form > button {
+  background: #007bff; /* Светло-синий цвет кнопки */
+  border: none;
+  padding: 0 1rem;
+  margin: 0.25rem;
+  border-radius: 3px;
+  outline: none;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#form > button:hover {
+  background-color: #0056b3; /* Светло-синий цвет при наведении */
+}
+
+#messages {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa;
+  margin-top: 5rem;
+}
+
+#edited {
+  color: gray;
+  font-size: small;
+  display: block;
+  float: right;
+}
+
+#text-container {
+  display: inline-block;
+  align-items: baseline;
+}
+
+.message {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  margin-bottom: 5px;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  margin-left: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: baseline;
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.username {
+  margin: 0;
+  margin-bottom: 0%;
+  color: #007bff;
+  margin-right: 0.5rem;
+  display: block;
+  float: left;
+}
+
+.message-time {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  color: #999999;
+}
+
+.message-options {
+  display: flex;
+}
+
+.message-time {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  color: #999999;
+}
+
+.text {
+  margin: 0;
+}
+
+.message-options {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 5px;
+  overflow: hidden;
+  display: none; /* Сначала скрываем меню */
+  z-index: 1; /* Устанавливаем высокий z-index для отображения поверх других элементов */
+}
+
+.message-options button {
+  border: none;
+  background: none;
+  color: #333333;
+  padding: 0.5rem;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.message-options button:hover {
+  background-color: #f1f3f5;
+}
+
+.message:hover .message-options {
+  display: block; /* Показываем меню при наведении на сообщение */
+}
+
+.edit-input {
+  border: 1px solid #80bdff;
+  padding: 0.5rem;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #333333;
+  outline: none;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.edit-input:focus {
+  border: 1px solid #0056b3;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; /* Делаем аватарку круглой */
+  margin-right: 0.5rem;
+}

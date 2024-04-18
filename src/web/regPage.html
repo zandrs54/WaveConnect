@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative; /* Добавлено для позиционирования */
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center; /* Центрирование элементов в контейнере */
+            position: relative; /* Добавлено для позиционирования */
+        }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            max-width: 300px; /* Максимальная ширина логотипа */
+            height: auto; /* Автоматическое масштабирование высоты */
+        }
+        h2 {
+            text-align: center;
+            margin-top: 0; /* Удаление отступа сверху */
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        input[type="submit"],
+        button[type="button"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover,
+        button[type="button"]:hover {
+            background-color: #0056b3;
+        }
+        input[type="submit"]:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img src="/styles/logoza.ru.png" alt="WaveConnect Logo" class="logo">
+        </div>
+        <h2><a href="/login">Авторизация</a> / Регистрация</h2>
+        <form>
+            <div class="form-group">
+                <label for="username">Имя пользователя:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Эл. почта:</label>
+                <input type="email" id="email" name="email" required>
+                <button type="button" id="checkEmailButton" onclick="checkEmail()">Проверить почту</button>
+            </div>
+            <div id="verificationCodeArea" style="display:none;">
+                <div class="form-group">
+                    <label for="verificationCode">Код подтверждения:</label>
+                    <input type="text" id="verificationCode" name="verificationCode" required oninput="validateForm()">
+                </div>
+                <div id="errorMessage" style="color: red;"></div>
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Register" id="register" disabled>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+    <script>
+        const socket = io('/reg')
+        const regName = document.getElementById('username')
+        const regEmail = document.getElementById('email')
+        const regPassword = document.getElementById('password')
+        const registerButton = document.getElementById('register')
+        const checkEmailButton = document.getElementById('checkEmailButton')
+        const verificationCodeArea = document.getElementById('verificationCodeArea')
+        const errorMessage = document.getElementById('errorMessage')
+
+        registerButton.addEventListener('click', saveData)
+
+        function validateForm() {
+            const verificationCode = document.getElementById('verificationCode').value;
+            if (/^\d{6}$/.test(verificationCode.trim())) {
+                socket.emit('checkingCode', verificationCode)
+                }
+
+        }
+        socket.on('checkedCode', (isTrue) => {
+            if(isTrue){
+                registerButton.removeAttribute('disabled')
+            }
+        })
+
+        checkEmailButton.addEventListener('click', function() {
+            const email = regEmail.value;
+            socket.emit('checkMail', email);
+            verificationCodeArea.style.display = 'block';
+        });
+
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            saveData();
+        });
+
+        function saveData() {
+            event.preventDefault()
+            socket.emit('saveUser', regName.value, regPassword.value, regEmail.value)
+            console.log('Отправлен запрос на регистрацию юзера')
+            document.cookie = `userName=${regName.value}`
+            document.cookie = `userEmail=${regEmail.value}`
+            document.cookie = `userPassword=${regPassword.value}`
+            console.log(`В куки записаны поля userName=${regName.value}, userEmail=${regEmail.value}, userPassword=${regPassword.value}`)
+            window.location.href = '/settings'
+        }
+        socket.on('userSaved', (status) => {
+            if(status){
+                
+            }
+        })
+    </script>
+</body>
+</html>
